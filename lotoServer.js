@@ -1,33 +1,25 @@
-var fs = require("fs"); 
-var nt = require("net");
+const http = require("http");
 
-var srv=nt.createServer();
-srv.on("connection",Connection);
+function generateNumbers() {
+    let nums = new Set();
+    while (nums.size < 10) {
+        nums.add(Math.floor(Math.random() * 49) + 1);
+    }
+    return Array.from(nums).join(" ");
+}
 
-srv.listen(8080,function(){
-	console.log("loto server")
+const srv = http.createServer((req, res) => {
+    if (req.url === "/loto") {
+        let vv = generateNumbers();
+        console.log("Números enviados:", vv);
+        res.writeHead(200, { "Content-Type": "text/plain" });
+        res.end(vv);
+    } else {
+        res.writeHead(404, { "Content-Type": "text/plain" });
+        res.end("404 - Not Found. Usa /loto");
+    }
 });
 
-function Connection(connection){
-connection.on('data',onData);
-connection.on('close',onClose);
-connection.on('error',onError);
-	function onData(data){
-		var vv="";
-		var v=0
-		for(v=0;v<10;v++)vv=vv+(Math.floor(Math.random()*49+1)).toString()+" "
-		console.log(vv.toString());
-		connection.end(vv.toString())
-			
-	}
-	function onClose(){
-		connection.destroy();
-	}
-	function onError(data){
-		console.log(data);
-		connection.destroy();
-	}
-
-
-
-}
+srv.listen(8080, "0.0.0.0", () => {
+    console.log("Servidor HTTP loto ativo em http://0.0.0.0:8080/loto");
+});
